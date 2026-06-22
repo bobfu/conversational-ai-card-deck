@@ -9,7 +9,7 @@
 
 .hero {
   max-width: 1040px;
-  margin-bottom: 32px;
+  margin: 0 auto 32px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -68,11 +68,12 @@
 }
 
 .toolbar {
+  max-width: 1040px;
+  margin: 0 auto 32px;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 32px;
 }
 
 .toolbar button {
@@ -116,7 +117,7 @@
 
 .zipProgress {
   max-width: 760px;
-  margin: -12px 0 32px;
+  margin: -12px auto 32px;
   padding: 16px 18px;
   border: 1px solid rgba(20, 28, 38, 0.1);
   border-radius: 8px;
@@ -199,10 +200,13 @@
 }
 
 .grid {
+  max-width: 1148px;
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fill, 360px);
+  grid-template-columns: repeat(auto-fit, 360px);
   gap: 34px;
   align-items: start;
+  justify-content: center;
 }
 
 @media (max-width: 720px) {
