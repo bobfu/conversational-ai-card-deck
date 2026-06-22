@@ -26,6 +26,22 @@ docs/HANDOFF_AND_PACKAGING.md
 docs/AI_CODING_SKILL.md
 ```
 
+## Content Source
+
+The canonical editable copy source is:
+
+```txt
+content/cards-final.csv
+```
+
+Keep only one active CSV in `content/` so collaborators do not edit the wrong file. The website runtime still reads:
+
+```txt
+src/data/cards.ts
+```
+
+After editing the CSV, import or regenerate `src/data/cards.ts`.
+
 ## Assets
 
 Place the two template images here:
