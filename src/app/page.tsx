@@ -32,6 +32,7 @@ export default function HomePage() {
   const [zipLocale, setZipLocale] = useState<CardLocale | null>(null);
   const [zipProgress, setZipProgress] = useState<ZipProgress | null>(null);
   const [exportLocale, setExportLocale] = useState<CardLocale | null>(null);
+  const cancelZipRef = useRef(false);
   const exportRefs = useRef<Record<CardLocale, Record<string, HTMLDivElement | null>>>({
     zh: {},
     en: {}
@@ -107,10 +108,26 @@ export default function HomePage() {
     });
   }
 
+  function cancelZipDownload() {
+    cancelZipRef.current = true;
+    setZipProgress((progress) =>
+      progress
+        ? {
+          ...progress,
+          currentFile:
+            progress.locale === "zh"
+              ? "正在取消..."
+              : "Cancelling..."
+        }
+        : progress
+    );
+  }
+
   async function handleDownloadZip(targetLocale: CardLocale) {
     if (zipLocale) return;
 
     try {
+      cancelZipRef.current = false;
       setZipLocale(targetLocale);
       setExportLocale(targetLocale);
 
@@ -128,6 +145,8 @@ export default function HomePage() {
       await waitForFrame();
 
       for (const [index, card] of cards.entries()) {
+        if (cancelZipRef.current) break;
+
         const element = exportRefs.current[targetLocale][card.id];
         const filename = formatCardImageName(card, targetLocale, index + 1);
 
@@ -152,6 +171,8 @@ export default function HomePage() {
         }
 
         const dataUrl = await exportCardElementToPng(element);
+        if (cancelZipRef.current) break;
+
         const base64 = dataUrl.split(",")[1];
 
         zip.file(filename, base64, {
@@ -166,6 +187,8 @@ export default function HomePage() {
           phase: "rendering"
         });
       }
+
+      if (cancelZipRef.current) return;
 
       setZipProgress({
         locale: targetLocale,
@@ -185,10 +208,11 @@ export default function HomePage() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (error) {
       console.error("Failed to download card ZIP", error);
     } finally {
+      cancelZipRef.current = false;
       setZipLocale(null);
       setZipProgress(null);
       setExportLocale(null);
@@ -306,7 +330,16 @@ export default function HomePage() {
               style={{ width: `${zipProgressPercent}%` }}
             />
           </div>
-          <p>{zipProgress.currentFile}</p>
+          <div className={styles.zipProgressFooter}>
+            <p>{zipProgress.currentFile}</p>
+            <button
+              type="button"
+              onClick={cancelZipDownload}
+              disabled={zipProgress.phase === "zipping"}
+            >
+              {zipProgress.locale === "zh" ? "取消" : "Cancel"}
+            </button>
+          </div>
         </div>
       ) : null}
 
