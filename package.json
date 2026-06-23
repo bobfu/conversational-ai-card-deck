@@ -8,12 +8,14 @@
   "dependencies": {
     "html-to-image": "^1.11.11",
     "jszip": "^3.10.1",
+    "matter-js": "^0.20.0",
     "next": "latest",
     "qrcode.react": "^4.2.0",
     "react": "latest",
     "react-dom": "latest"
   },
   "devDependencies": {
+    "@types/matter-js": "^0.20.2",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",

@@ -1,6 +1,7 @@
 .experience {
-  min-height: 100vh;
-  padding: 44px;
+  box-sizing: border-box;
+  min-height: 100svh;
+  padding: clamp(18px, 3vh, 32px) 44px clamp(12px, 2vh, 22px);
   overflow-x: hidden;
   background:
     linear-gradient(90deg, rgba(20, 115, 255, 0.05) 1px, transparent 1px),
@@ -20,8 +21,8 @@
   max-width: 1180px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 260px;
-  gap: 52px;
+  grid-template-columns: minmax(0, 1fr) 230px;
+  gap: 36px;
   align-items: end;
 }
 
@@ -30,9 +31,9 @@
 }
 
 .kicker {
-  margin: 0 0 14px;
+  margin: 0 0 8px;
   color: #1473ff;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -42,18 +43,18 @@
   max-width: 720px;
   margin: 0;
   color: #111111;
-  font-size: 76px;
-  line-height: 1.02;
+  font-size: clamp(42px, 5.2vw, 64px);
+  line-height: 1;
   font-weight: 950;
   letter-spacing: 0;
 }
 
 .copy p:not(.kicker) {
   max-width: 650px;
-  margin: 24px 0 0;
+  margin: 14px 0 0;
   color: #3a414b;
-  font-size: 24px;
-  line-height: 1.65;
+  font-size: clamp(16px, 1.6vw, 21px);
+  line-height: 1.48;
   font-weight: 600;
 }
 
@@ -61,18 +62,18 @@
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 34px;
+  margin-top: 20px;
 }
 
 .controls button,
 .drawButton {
   border: 1px solid rgba(20, 28, 38, 0.12);
   border-radius: 999px;
-  padding: 12px 20px;
+  padding: 9px 16px;
   background: rgba(255, 255, 255, 0.88);
   color: #252a33;
   font: inherit;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 750;
   cursor: pointer;
   box-shadow: 0 12px 28px rgba(20, 28, 38, 0.08);
@@ -86,22 +87,22 @@
 
 .drawPanel {
   display: grid;
-  gap: 14px;
+  gap: 10px;
   justify-items: stretch;
 }
 
 .drawButton {
   border-color: rgba(20, 115, 255, 0.24);
-  padding: 14px 28px;
+  padding: 12px 22px;
   color: #1473ff;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .drawHint {
   margin: 0;
   color: #5e6672;
-  font-size: 16px;
-  line-height: 1.55;
+  font-size: 14px;
+  line-height: 1.45;
   font-weight: 650;
   text-align: center;
 }
@@ -118,23 +119,32 @@
 }
 
 .wordGrid {
+  position: relative;
   max-width: 1180px;
-  min-height: 560px;
-  margin: 42px auto 0;
-  display: flex;
-  align-content: flex-start;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 18px 14px;
-  padding: 26px 8px 40px;
+  height: clamp(390px, calc(100svh - 255px), 590px);
+  margin: 20px auto 0;
+  overflow: hidden;
+  border-radius: 0 0 32px 32px;
+  touch-action: manipulation;
+}
+
+.wordGrid::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 86px;
+  background: linear-gradient(180deg, transparent, rgba(20, 28, 38, 0.08));
+  pointer-events: none;
 }
 
 .wordTile {
-  position: relative;
-  width: max-content;
-  min-width: 136px;
-  max-width: 230px;
-  min-height: 64px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--capsule-width);
+  height: var(--capsule-height);
   border: 0;
   padding: 0;
   background: transparent;
@@ -142,57 +152,39 @@
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transform: rotate(var(--tilt, -4deg));
+  will-change: transform, width, height;
   transition:
-    transform 260ms ease,
+    transform 0ms linear,
     filter 260ms ease,
-    z-index 0ms linear 260ms;
-}
-
-.wordTile:nth-child(6n + 1) {
-  --tilt: -8deg;
-}
-
-.wordTile:nth-child(6n + 2) {
-  --tilt: 5deg;
-}
-
-.wordTile:nth-child(6n + 3) {
-  --tilt: -2deg;
-}
-
-.wordTile:nth-child(6n + 4) {
-  --tilt: 8deg;
-}
-
-.wordTile:nth-child(6n + 5) {
-  --tilt: -5deg;
-}
-
-.wordTile:nth-child(6n) {
-  --tilt: 3deg;
+    width 260ms ease,
+    height 260ms ease;
 }
 
 .wordTile:hover {
-  transform: rotate(var(--tilt, -4deg)) translateY(-5px);
+  filter: brightness(1.02);
   z-index: 3;
 }
 
 .wordTile.open {
-  max-width: 420px;
-  z-index: 8;
-  transform: rotate(0deg) translateY(-8px);
+  width: min(460px, calc(100% - 36px));
+  height: 246px;
+  z-index: 18;
+  filter: brightness(1);
   transition:
-    transform 260ms ease,
-    filter 260ms ease;
+    transform 1280ms cubic-bezier(0.16, 0.9, 0.18, 1),
+    filter 260ms ease,
+    width 620ms cubic-bezier(0.18, 0.82, 0.2, 1),
+    height 620ms cubic-bezier(0.18, 0.82, 0.2, 1);
 }
 
 .capsuleShell {
   position: relative;
   display: flex;
-  min-height: 64px;
+  width: 100%;
+  height: 100%;
   flex-direction: column;
   justify-content: center;
+  box-sizing: border-box;
   border: 1px solid rgba(20, 28, 38, 0.1);
   border-radius: 999px;
   padding: 12px 19px 11px;
@@ -222,6 +214,19 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.62);
   filter: blur(1px);
+  pointer-events: none;
+}
+
+.capsuleShell::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  bottom: 6px;
+  left: 14px;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(20, 28, 38, 0.05);
+  filter: blur(4px);
   pointer-events: none;
 }
 
@@ -320,17 +325,39 @@
 }
 
 .wordTile.open .capsuleShell {
-  min-height: 232px;
-  border-radius: 28px;
-  padding: 20px;
+  border-width: 1px;
+  border-radius: 38px;
+  padding: 22px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.92)),
-    url("/assets/build-template.png");
+    linear-gradient(150deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.68) 44%, rgba(232, 244, 255, 0.82)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 249, 255, 0.9)),
+    #ffffff;
   background-size: cover;
   background-position: center;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    0 24px 60px rgba(20, 28, 38, 0.18);
+    inset 0 -18px 30px rgba(20, 115, 255, 0.09),
+    inset 0 -4px 0 rgba(20, 28, 38, 0.06),
+    0 6px 0 rgba(20, 28, 38, 0.05),
+    0 28px 70px rgba(20, 28, 38, 0.22);
+}
+
+.wordTile.open .capsuleShell::before {
+  left: 24px;
+  right: 42%;
+  top: 12px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.82);
+  filter: blur(6px);
+}
+
+.wordTile.open .capsuleShell::after {
+  right: 28px;
+  bottom: 13px;
+  left: 28px;
+  height: 24px;
+  background: rgba(20, 28, 38, 0.08);
+  filter: blur(8px);
 }
 
 .wordTile.open .capsuleTop,
@@ -345,8 +372,8 @@
 }
 
 .capsuleContent strong {
-  color: #1473ff;
-  font-size: 26px;
+  color: #111111;
+  font-size: 28px;
   line-height: 1.18;
   font-weight: 950;
   letter-spacing: 0;
@@ -361,10 +388,34 @@
 }
 
 .capsuleContent span:last-child {
-  color: #3d444e;
+  color: #303742;
   font-size: 16px;
   line-height: 1.5;
   font-weight: 600;
+}
+
+.buildTone.open .capsuleShell {
+  border-color: rgba(20, 115, 255, 0.28);
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.68) 46%, rgba(223, 240, 255, 0.88)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 247, 255, 0.92)),
+    #ffffff;
+}
+
+.growTone.open .capsuleShell {
+  border-color: rgba(19, 184, 63, 0.28);
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.68) 46%, rgba(224, 255, 235, 0.86)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 255, 245, 0.92)),
+    #ffffff;
+}
+
+.buildTone.open .seriesPill {
+  background: #1473ff;
+}
+
+.growTone.open .seriesPill {
+  background: #13a83b;
 }
 
 @media (max-width: 920px) {
@@ -441,25 +492,14 @@
   }
 
   .wordGrid {
-    min-height: 0;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    height: clamp(520px, 68vh, 680px);
     margin-top: 28px;
-    padding: 0 0 28px;
+    border-radius: 0 0 24px 24px;
   }
 
   .wordTile {
-    width: auto;
-    min-width: 0;
-    max-width: none;
-    min-height: 64px;
-    transform: none;
-  }
-
-  .wordTile:hover,
-  .wordTile.open {
-    transform: none;
+    width: var(--capsule-width);
+    height: var(--capsule-height);
   }
 
   .seriesPill {
@@ -468,7 +508,6 @@
   }
 
   .capsuleShell {
-    min-height: 64px;
     padding: 12px 14px 11px;
   }
 
@@ -487,7 +526,6 @@
   }
 
   .wordTile.open .capsuleShell {
-    min-height: 220px;
     border-radius: 22px;
     padding: 16px;
   }
@@ -508,11 +546,8 @@
 }
 
 @media (max-width: 380px) {
-  .wordGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .wordTile {
-    min-height: 168px;
+  .wordTile.open {
+    width: calc(100% - 28px);
+    height: 224px;
   }
 }
