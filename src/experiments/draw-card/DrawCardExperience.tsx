@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { CardSeries } from "@/data/cards";
 import { getInspirationCards, type InspirationCard } from "./inspiration";
 import styles from "./DrawCardExperience.module.css";
@@ -22,6 +22,7 @@ export function DrawCardExperience() {
   const [filter, setFilter] = useState<DrawFilter>("all");
   const [selected, setSelected] = useState<InspirationCard | null>(null);
   const [isFlipped, setIsFlipped] = useState(false);
+  const tileRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   const cards = useMemo(() => getInspirationCards(filter), [filter]);
 
@@ -29,17 +30,21 @@ export function DrawCardExperience() {
     const next = pickRandom(cards, selected);
     if (!next) return;
 
-    setIsFlipped(false);
+    setSelected(next);
+    setIsFlipped(true);
     window.setTimeout(() => {
-      setSelected(next);
-      window.setTimeout(() => setIsFlipped(true), 80);
-    }, selected ? 260 : 0);
+      tileRefs.current[next.card.id]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "nearest"
+      });
+    }, 80);
   }
 
   function chooseCard(card: InspirationCard) {
+    const isSameCard = selected?.card.id === card.card.id;
     setSelected(card);
-    setIsFlipped(false);
-    window.setTimeout(() => setIsFlipped(true), 80);
+    setIsFlipped(isSameCard ? !isFlipped : true);
   }
 
   function updateFilter(nextFilter: DrawFilter) {
@@ -47,9 +52,6 @@ export function DrawCardExperience() {
     setSelected(null);
     setIsFlipped(false);
   }
-
-  const heroWords = selected?.words ?? ["好奇", "勇气", "超越"];
-  const seriesLabel = selected?.card.series === "grow" ? "Grow" : "Build";
 
   return (
     <main className={styles.experience}>
@@ -94,59 +96,42 @@ export function DrawCardExperience() {
           >
             随机抽一张
           </button>
-
-          <button
-            type="button"
-            className={`${styles.featuredCard} ${isFlipped ? styles.flipped : ""}`}
-            onClick={() => selected && setIsFlipped((value) => !value)}
-            aria-label={selected ? "翻动当前卡片" : "当前灵感卡"}
-          >
-            <span className={styles.cardFace}>
-              <span className={styles.seriesPill}>
-                {selected ? seriesLabel : "Draw"}
-              </span>
-              <span className={styles.wordCluster}>
-                {heroWords.map((word) => (
-                  <span key={word}>{word}</span>
-                ))}
-              </span>
-              <span className={styles.tapHint}>点击翻开</span>
-            </span>
-
-            <span className={`${styles.cardFace} ${styles.cardFront}`}>
-              {selected ? (
-                <>
-                  <span className={styles.seriesPill}>{seriesLabel}</span>
-                  <strong>{selected.card.title}</strong>
-                  <em>{selected.card.subtitle}</em>
-                  <span>{selected.prompt}</span>
-                </>
-              ) : (
-                <>
-                  <span className={styles.seriesPill}>Ready</span>
-                  <strong>让一个词先找到你</strong>
-                  <em>选择下方词卡，或随机抽一张</em>
-                  <span>翻开后会看到它连接的社区资源。</span>
-                </>
-              )}
-            </span>
-          </button>
+          <p className={styles.drawHint}>
+            点击下面任意关键词，它会在原地翻开。
+          </p>
         </div>
       </section>
 
       <section className={styles.wordGrid} aria-label="灵感词列表">
         {cards.map((item) => {
           const isSelected = selected?.card.id === item.card.id;
+          const shouldFlip = isSelected && isFlipped;
+          const seriesLabel = item.card.series === "grow" ? "Grow" : "Build";
 
           return (
             <button
               type="button"
               key={item.card.id}
-              className={`${styles.wordTile} ${isSelected ? styles.selected : ""}`}
+              ref={(element) => {
+                tileRefs.current[item.card.id] = element;
+              }}
+              className={`${styles.wordTile} ${isSelected ? styles.selected : ""} ${shouldFlip ? styles.flipped : ""}`}
               onClick={() => chooseCard(item)}
             >
-              <span>{item.words[0]}</span>
-              <small>{item.words.slice(1).join(" / ")}</small>
+              <span className={styles.tileInner}>
+                <span className={styles.tileFace}>
+                  <span className={styles.seriesPill}>{seriesLabel}</span>
+                  <span className={styles.tileWord}>{item.words[0]}</span>
+                  <small>{item.words.slice(1).join(" / ")}</small>
+                </span>
+
+                <span className={`${styles.tileFace} ${styles.tileFront}`}>
+                  <span className={styles.seriesPill}>{seriesLabel}</span>
+                  <strong>{item.card.title}</strong>
+                  <em>{item.card.subtitle}</em>
+                  <span>{item.prompt}</span>
+                </span>
+              </span>
             </button>
           );
         })}
