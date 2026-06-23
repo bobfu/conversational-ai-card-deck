@@ -105,8 +105,10 @@ export function DrawCardExperience() {
       <section className={styles.wordGrid} aria-label="灵感词列表">
         {cards.map((item) => {
           const isSelected = selected?.card.id === item.card.id;
-          const shouldFlip = isSelected && isFlipped;
+          const isOpen = isSelected && isFlipped;
           const seriesLabel = item.card.series === "grow" ? "Grow" : "Build";
+          const toneClass =
+            item.card.series === "grow" ? styles.growTone : styles.buildTone;
 
           return (
             <button
@@ -115,17 +117,18 @@ export function DrawCardExperience() {
               ref={(element) => {
                 tileRefs.current[item.card.id] = element;
               }}
-              className={`${styles.wordTile} ${isSelected ? styles.selected : ""} ${shouldFlip ? styles.flipped : ""}`}
+              className={`${styles.wordTile} ${toneClass} ${isOpen ? styles.open : ""}`}
               onClick={() => chooseCard(item)}
             >
-              <span className={styles.tileInner}>
-                <span className={styles.tileFace}>
-                  <span className={styles.seriesPill}>{seriesLabel}</span>
-                  <span className={styles.tileWord}>{item.words[0]}</span>
-                  <small>{item.words.slice(1).join(" / ")}</small>
+              <span className={styles.capsuleShell}>
+                <span className={styles.capsuleTop}>
+                  <span className={styles.capsuleWord}>{item.words[0]}</span>
+                  <span className={styles.capsuleIcon}>+</span>
                 </span>
-
-                <span className={`${styles.tileFace} ${styles.tileFront}`}>
+                <span className={styles.capsuleSupport}>
+                  {item.words.slice(1).join(" / ")}
+                </span>
+                <span className={styles.capsuleContent}>
                   <span className={styles.seriesPill}>{seriesLabel}</span>
                   <strong>{item.card.title}</strong>
                   <em>{item.card.subtitle}</em>
