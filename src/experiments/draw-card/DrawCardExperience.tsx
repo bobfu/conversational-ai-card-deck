@@ -63,7 +63,7 @@ function shakeCapsules(bodies: Record<string, Matter.Body>, strength = 1) {
 
     Matter.Body.setVelocity(body, {
       x: body.velocity.x + sideKick * strength,
-      y: body.velocity.y - (5.8 + (index % 4)) * strength
+      y: body.velocity.y - (4.6 + (index % 4) * 0.8) * strength
     });
     Matter.Body.setAngularVelocity(
       body,
@@ -163,6 +163,11 @@ export function DrawCardExperience() {
           restitution: 0.72,
           friction: 0.58
         }),
+        Matter.Bodies.rectangle(width / 2, -wall / 2 - 18, width + wall * 2, wall, {
+          isStatic: true,
+          restitution: 0.68,
+          friction: 0.42
+        }),
         Matter.Bodies.rectangle(-wall / 2, height / 2, wall, height * 3, {
           isStatic: true,
           restitution: 0.62,
@@ -217,6 +222,27 @@ export function DrawCardExperience() {
 
           const visualWidth = node.offsetWidth;
           const visualHeight = node.offsetHeight;
+
+          if (
+            !body.isStatic &&
+            (
+              body.position.x < -visualWidth ||
+              body.position.x > width + visualWidth ||
+              body.position.y < -visualHeight * 3 ||
+              body.position.y > height + visualHeight * 2
+            )
+          ) {
+            Matter.Body.setPosition(body, {
+              x: clamp(body.position.x, visualWidth / 2 + 12, width - visualWidth / 2 - 12),
+              y: -visualHeight
+            });
+            Matter.Body.setVelocity(body, {
+              x: clamp(body.velocity.x, -2, 2),
+              y: 1.6
+            });
+            Matter.Body.setAngularVelocity(body, clamp(body.angularVelocity, -0.06, 0.06));
+          }
+
           const x = body.position.x - visualWidth / 2;
           const y = body.position.y - visualHeight / 2;
           node.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${body.angle}rad)`;
