@@ -73,7 +73,7 @@ export const cards: CardItem[] = [
     title: "Agora Skills",
     subtitle: "用 AI Coding Assistant 快速搭建实时对话应用",
     intro: "Agora 官方知识包，帮助 AI Coding Assistant 选对产品、接入凭证并跑通第一个 Demo，适合快速搭建 Voice Agent、AI Companion、AI Tutor、AI 客服与 Physical AI 应用。",
-    url: "https://github.com/AgoraIO-Conversational-AI/",
+    url: "https://github.com/AgoraIO/skills",
     icon: "agent-skill-library"
   },
   {
