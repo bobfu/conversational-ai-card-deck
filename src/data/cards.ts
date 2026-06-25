@@ -82,7 +82,7 @@ export const cards: CardItem[] = [
     title: "Agora Agents",
     subtitle: "快速构建实时对话 Agent 的开发平台",
     intro: "基于 Agora 实时互动基础设施，提供构建、部署和管理 Voice Agent 与多模态 Agent 的完整开发体验。",
-    url: "https://github.com/AgoraIO-Conversational-AI/",
+    url: "https://docs.agora.io/en/build-with-ai",
     icon: "agora-agents"
   },
   {
