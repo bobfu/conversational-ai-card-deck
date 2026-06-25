@@ -14,6 +14,12 @@ type SensorPermissionConstructor = {
   requestPermission?: () => Promise<SensorPermissionResponse>;
 };
 
+type DragState = {
+  lastX: number;
+  lastY: number;
+  lastTime: number;
+};
+
 function pickRandom<T>(items: T[], avoid?: T | null) {
   if (items.length === 0) return null;
   if (items.length === 1) return items[0];
@@ -48,6 +54,57 @@ function getOpenCapsuleTarget(bounds: DOMRect, visualWidth: number, visualHeight
   };
 }
 
+function shakeCapsules(bodies: Record<string, Matter.Body>, strength = 1) {
+  for (const [index, body] of Object.values(bodies).entries()) {
+    if (body.isStatic) continue;
+
+    const direction = index % 2 === 0 ? 1 : -1;
+    const sideKick = ((index % 5) - 2) * 1.4 + direction * 2.4;
+
+    Matter.Body.setVelocity(body, {
+      x: body.velocity.x + sideKick * strength,
+      y: body.velocity.y - (5.8 + (index % 4)) * strength
+    });
+    Matter.Body.setAngularVelocity(
+      body,
+      body.angularVelocity + direction * (0.12 + (index % 3) * 0.035) * strength
+    );
+  }
+}
+
+function pushCapsulesNearPoint(
+  bodies: Record<string, Matter.Body>,
+  x: number,
+  y: number,
+  velocityX: number,
+  velocityY: number
+) {
+  const speed = Math.hypot(velocityX, velocityY);
+  if (speed < 0.08) return;
+
+  const radius = 190;
+  const strength = clamp(speed / 18, 0.18, 1.6);
+
+  for (const body of Object.values(bodies)) {
+    if (body.isStatic) continue;
+
+    const dx = body.position.x - x;
+    const dy = body.position.y - y;
+    const distance = Math.hypot(dx, dy);
+    if (distance > radius) continue;
+
+    const influence = (1 - distance / radius) * strength;
+    Matter.Body.setVelocity(body, {
+      x: body.velocity.x + velocityX * 0.12 * influence,
+      y: body.velocity.y + velocityY * 0.12 * influence
+    });
+    Matter.Body.setAngularVelocity(
+      body,
+      body.angularVelocity + clamp(velocityX / 700, -0.18, 0.18) * influence
+    );
+  }
+}
+
 export function DrawCardExperience() {
   const [filter, setFilter] = useState<DrawFilter>("all");
   const [selected, setSelected] = useState<InspirationCard | null>(null);
@@ -58,6 +115,7 @@ export function DrawCardExperience() {
   const bodiesRef = useRef<Record<string, Matter.Body>>({});
   const engineRef = useRef<Matter.Engine | null>(null);
   const frameRef = useRef<number | null>(null);
+  const dragStateRef = useRef<DragState | null>(null);
   const lastShakeRef = useRef(0);
   const lastMotionMagnitudeRef = useRef(0);
 
@@ -270,18 +328,15 @@ export function DrawCardExperience() {
       const pushX = clamp(x / 12, -1, 1);
       const lift = clamp(Math.abs(y) / 16, 0.18, 1);
 
-      for (const [index, body] of Object.values(bodiesRef.current).entries()) {
+      for (const body of Object.values(bodiesRef.current)) {
         if (body.isStatic) continue;
 
         Matter.Body.setVelocity(body, {
-          x: body.velocity.x + pushX * 5.8 * impulse,
-          y: body.velocity.y - lift * 4.4 * impulse
+          x: body.velocity.x + pushX * 4.8 * impulse,
+          y: body.velocity.y - lift * 3.4 * impulse
         });
-        Matter.Body.setAngularVelocity(
-          body,
-          body.angularVelocity + (index % 2 === 0 ? 0.1 : -0.1) * impulse
-        );
       }
+      shakeCapsules(bodiesRef.current, impulse * 0.48);
     }
 
     window.addEventListener("deviceorientation", handleOrientation);
@@ -361,14 +416,80 @@ export function DrawCardExperience() {
     }
   }
 
+  async function shakeExperience() {
+    shakeCapsules(bodiesRef.current, 1);
+
+    if (motionControl !== "idle") return;
+    await requestMotionControl();
+  }
+
+  function handlePointerDown(event: React.PointerEvent<HTMLElement>) {
+    if (event.button !== 0 && event.pointerType === "mouse") return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    dragStateRef.current = {
+      lastX: event.clientX - bounds.left,
+      lastY: event.clientY - bounds.top,
+      lastTime: window.performance.now()
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function handlePointerMove(event: React.PointerEvent<HTMLElement>) {
+    const dragState = dragStateRef.current;
+    if (!dragState) return;
+
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - bounds.left;
+    const y = event.clientY - bounds.top;
+    const now = window.performance.now();
+    const elapsed = Math.max(16, now - dragState.lastTime);
+    const velocityX = ((x - dragState.lastX) / elapsed) * 16.67;
+    const velocityY = ((y - dragState.lastY) / elapsed) * 16.67;
+
+    pushCapsulesNearPoint(bodiesRef.current, x, y, velocityX, velocityY);
+    dragStateRef.current = {
+      lastX: x,
+      lastY: y,
+      lastTime: now
+    };
+  }
+
+  function handlePointerEnd(event: React.PointerEvent<HTMLElement>) {
+    dragStateRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  }
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      const target = event.target as HTMLElement | null;
+      const isTyping =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable;
+
+      if (isTyping || event.code !== "Space") return;
+
+      event.preventDefault();
+      shakeCapsules(bodiesRef.current, 1);
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   const motionButtonLabel =
     motionControl === "active"
-      ? "体感已开启"
+      ? "摇一摇已开启"
       : motionControl === "unsupported"
-        ? "体感不可用"
+        ? "摇一摇"
         : motionControl === "denied"
-          ? "需要传感器权限"
-          : "开启体感";
+          ? "摇一摇"
+          : "摇一摇";
 
   return (
     <main className={styles.experience}>
@@ -414,20 +535,28 @@ export function DrawCardExperience() {
             随机抽一张
           </button>
           <p className={styles.drawHint}>
-            点击胶囊，或晃动手机让它们重新滚动。
+            点击或按空格摇动；桌面可拖拽搅动。
           </p>
           <button
             type="button"
             className={`${styles.motionButton} ${motionControl === "active" ? styles.motionActive : ""}`}
-            onClick={requestMotionControl}
-            disabled={motionControl === "active" || motionControl === "unsupported"}
+            onClick={shakeExperience}
           >
             {motionButtonLabel}
           </button>
         </div>
       </section>
 
-      <section ref={pitRef} className={styles.wordGrid} aria-label="灵感词列表">
+      <section
+        ref={pitRef}
+        className={styles.wordGrid}
+        aria-label="灵感词列表"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        onPointerCancel={handlePointerEnd}
+        onLostPointerCapture={handlePointerEnd}
+      >
         {cards.map((item, index) => {
           const isSelected = selected?.card.id === item.card.id;
           const isOpen = isSelected && isFlipped;

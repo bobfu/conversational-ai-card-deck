@@ -142,7 +142,13 @@
   margin: 20px auto 0;
   overflow: hidden;
   border-radius: 0 0 32px 32px;
+  cursor: grab;
   touch-action: manipulation;
+  user-select: none;
+}
+
+.wordGrid:active {
+  cursor: grabbing;
 }
 
 .wordGrid::after {
