@@ -425,6 +425,12 @@ export function DrawCardExperience() {
 
   function handlePointerDown(event: React.PointerEvent<HTMLElement>) {
     if (event.button !== 0 && event.pointerType === "mouse") return;
+    const target = event.target;
+
+    if (target instanceof Element && target.closest("[data-capsule]")) {
+      return;
+    }
+
     const bounds = event.currentTarget.getBoundingClientRect();
     dragStateRef.current = {
       lastX: event.clientX - bounds.left,
@@ -573,6 +579,7 @@ export function DrawCardExperience() {
             <button
               type="button"
               key={item.card.id}
+              data-capsule="true"
               ref={(element) => {
                 tileRefs.current[item.card.id] = element;
               }}
