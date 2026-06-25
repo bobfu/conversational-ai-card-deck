@@ -150,6 +150,7 @@ export function DrawCardExperience() {
       const width = Math.max(bounds.width, 320);
       const height = Math.max(bounds.height, 460);
       const wall = 100;
+      const ceilingOffset = Math.max(320, height * 0.55);
       const engine = Matter.Engine.create();
       const bodies: Record<string, Matter.Body> = {};
 
@@ -163,7 +164,7 @@ export function DrawCardExperience() {
           restitution: 0.72,
           friction: 0.58
         }),
-        Matter.Bodies.rectangle(width / 2, -wall / 2 - 18, width + wall * 2, wall, {
+        Matter.Bodies.rectangle(width / 2, -ceilingOffset - wall / 2, width + wall * 2, wall, {
           isStatic: true,
           restitution: 0.68,
           friction: 0.42
@@ -228,7 +229,7 @@ export function DrawCardExperience() {
             (
               body.position.x < -visualWidth ||
               body.position.x > width + visualWidth ||
-              body.position.y < -visualHeight * 3 ||
+              body.position.y < -ceilingOffset - visualHeight * 1.5 ||
               body.position.y > height + visualHeight * 2
             )
           ) {
