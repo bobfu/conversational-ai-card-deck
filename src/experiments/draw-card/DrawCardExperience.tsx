@@ -7,6 +7,12 @@ import { getInspirationCards, type InspirationCard } from "./inspiration";
 import styles from "./DrawCardExperience.module.css";
 
 type DrawFilter = CardSeries | "all";
+type MotionControlState = "idle" | "active" | "unsupported" | "denied";
+type SensorPermissionResponse = "granted" | "denied";
+
+type SensorPermissionConstructor = {
+  requestPermission?: () => Promise<SensorPermissionResponse>;
+};
 
 function pickRandom<T>(items: T[], avoid?: T | null) {
   if (items.length === 0) return null;
@@ -46,11 +52,14 @@ export function DrawCardExperience() {
   const [filter, setFilter] = useState<DrawFilter>("all");
   const [selected, setSelected] = useState<InspirationCard | null>(null);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [motionControl, setMotionControl] = useState<MotionControlState>("idle");
   const pitRef = useRef<HTMLElement | null>(null);
   const tileRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const bodiesRef = useRef<Record<string, Matter.Body>>({});
   const engineRef = useRef<Matter.Engine | null>(null);
   const frameRef = useRef<number | null>(null);
+  const lastShakeRef = useRef(0);
+  const lastMotionMagnitudeRef = useRef(0);
 
   const cards = useMemo(() => getInspirationCards(filter), [filter]);
 
@@ -224,6 +233,72 @@ export function DrawCardExperience() {
     };
   }, [selected, isFlipped]);
 
+  useEffect(() => {
+    if (motionControl !== "active") return;
+
+    function handleOrientation(event: DeviceOrientationEvent) {
+      const engine = engineRef.current;
+      if (!engine) return;
+
+      const leftRight = typeof event.gamma === "number" ? event.gamma : 0;
+      const frontBack = typeof event.beta === "number" ? event.beta : 0;
+
+      engine.gravity.x = clamp(leftRight / 32, -0.9, 0.9);
+      engine.gravity.y = clamp(0.96 + frontBack / 88, 0.42, 1.55);
+    }
+
+    function handleMotion(event: DeviceMotionEvent) {
+      const engine = engineRef.current;
+      if (!engine) return;
+
+      const acceleration = event.acceleration || event.accelerationIncludingGravity;
+      if (!acceleration) return;
+
+      const x = acceleration.x || 0;
+      const y = acceleration.y || 0;
+      const z = acceleration.z || 0;
+      const magnitude = Math.sqrt(x * x + y * y + z * z);
+      const delta = Math.abs(magnitude - lastMotionMagnitudeRef.current);
+      const now = window.performance.now();
+
+      lastMotionMagnitudeRef.current = magnitude;
+
+      if (delta < 7.5 || now - lastShakeRef.current < 240) return;
+      lastShakeRef.current = now;
+
+      const impulse = clamp(delta / 22, 0.26, 1.25);
+      const pushX = clamp(x / 12, -1, 1);
+      const lift = clamp(Math.abs(y) / 16, 0.18, 1);
+
+      for (const [index, body] of Object.values(bodiesRef.current).entries()) {
+        if (body.isStatic) continue;
+
+        Matter.Body.setVelocity(body, {
+          x: body.velocity.x + pushX * 5.8 * impulse,
+          y: body.velocity.y - lift * 4.4 * impulse
+        });
+        Matter.Body.setAngularVelocity(
+          body,
+          body.angularVelocity + (index % 2 === 0 ? 0.1 : -0.1) * impulse
+        );
+      }
+    }
+
+    window.addEventListener("deviceorientation", handleOrientation);
+    window.addEventListener("devicemotion", handleMotion);
+
+    return () => {
+      window.removeEventListener("deviceorientation", handleOrientation);
+      window.removeEventListener("devicemotion", handleMotion);
+
+      const engine = engineRef.current;
+      if (engine) {
+        engine.gravity.x = 0;
+        engine.gravity.y = 1.12;
+      }
+    };
+  }, [motionControl]);
+
   function drawRandomCard() {
     const next = pickRandom(cards, selected);
     if (!next) return;
@@ -250,6 +325,50 @@ export function DrawCardExperience() {
     setSelected(null);
     setIsFlipped(false);
   }
+
+  async function requestMotionControl() {
+    if (typeof window === "undefined") return;
+
+    const motionConstructor = window.DeviceMotionEvent as
+      | (typeof DeviceMotionEvent & SensorPermissionConstructor)
+      | undefined;
+    const orientationConstructor = window.DeviceOrientationEvent as
+      | (typeof DeviceOrientationEvent & SensorPermissionConstructor)
+      | undefined;
+
+    if (!motionConstructor && !orientationConstructor) {
+      setMotionControl("unsupported");
+      return;
+    }
+
+    try {
+      const motionPermissionRequest =
+        motionConstructor?.requestPermission?.() ?? Promise.resolve("granted");
+      const orientationPermissionRequest =
+        orientationConstructor?.requestPermission?.() ?? Promise.resolve("granted");
+      const [motionPermission, orientationPermission] = await Promise.all([
+        motionPermissionRequest,
+        orientationPermissionRequest
+      ]);
+
+      if (motionPermission === "granted" && orientationPermission === "granted") {
+        setMotionControl("active");
+      } else {
+        setMotionControl("denied");
+      }
+    } catch {
+      setMotionControl("denied");
+    }
+  }
+
+  const motionButtonLabel =
+    motionControl === "active"
+      ? "体感已开启"
+      : motionControl === "unsupported"
+        ? "体感不可用"
+        : motionControl === "denied"
+          ? "需要传感器权限"
+          : "开启体感";
 
   return (
     <main className={styles.experience}>
@@ -295,8 +414,16 @@ export function DrawCardExperience() {
             随机抽一张
           </button>
           <p className={styles.drawHint}>
-            点击任意胶囊，它会在原地展开。
+            点击胶囊，或晃动手机让它们重新滚动。
           </p>
+          <button
+            type="button"
+            className={`${styles.motionButton} ${motionControl === "active" ? styles.motionActive : ""}`}
+            onClick={requestMotionControl}
+            disabled={motionControl === "active" || motionControl === "unsupported"}
+          >
+            {motionButtonLabel}
+          </button>
         </div>
       </section>
 
