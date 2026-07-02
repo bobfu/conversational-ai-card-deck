@@ -10,7 +10,7 @@ export interface CardItem {
   icon: string;
 }
 
-export type CardLocale = "zh" | "en";
+export type CardLocale = "zh" | "en" | "ja";
 
 export const cards: CardItem[] = [
   {
@@ -469,12 +469,184 @@ const englishCopy: Record<
   }
 };
 
+const japaneseCopy: Record<
+  string,
+  Pick<CardItem, "title" | "subtitle" | "intro">
+> = {
+  "product-library": {
+    title: "対話型AIプロダクトライブラリ",
+    subtitle: "注目すべき Conversational AI プロダクトを発見",
+    intro: "Voice Agent、Physical AI、AI Hardware などの先進プロダクトと事例を収録。次世代の人とコンピューターの関わりがどのように実装されているかを知り、プロダクトの発想を広げます。"
+  },
+  "tool-library": {
+    title: "対話型AIツールライブラリ",
+    subtitle: "Voice Agent を構築する最新モデルとツール",
+    intro: "TTS、STT、リアルタイム音声モデル、Agent Framework、API、開発ツールなどの技術選択肢を整理。自分のプロダクトに合う技術スタックを選ぶための手がかりを提供します。"
+  },
+  "curious-handbook": {
+    title: "対話型AIビギナーズガイド",
+    subtitle: "対話型AIを作り始めるための最初の一冊",
+    intro: "入門者向けに、基本概念、代表的なユースケース、最初の Voice Agent Demo までを整理。対話型AIのプロダクトと技術をすばやく理解できます。"
+  },
+  "voice-agent-notes": {
+    title: "Voice Agent 学習ノート",
+    subtitle: "先端モデルとプロダクトの作り手の思考を読む",
+    intro: "Voice Agent 領域の新しいモデル、プロダクト、論文、インタビューを継続的に整理。作り手がシナリオや体験をどう磨き、次世代の音声エージェントを構築しているかを読み解きます。"
+  },
+  "physical-ai-notes": {
+    title: "Physical AI 学習ノート",
+    subtitle: "対話型AIが現実世界へ入るとき",
+    intro: "AI ハードウェア、ロボット、ウェアラブル、エッジAI、マルチモーダル体験に注目。音声、視覚、センサー、ハードウェアを組み合わせた Physical AI の実装を追います。"
+  },
+  "agent-recipe-library": {
+    title: "Agent Recipe Library",
+    subtitle: "再利用できる Voice Agent コードレシピ",
+    intro: "視覚、RAG、記憶、ツール呼び出し、MCP、モデル切替、割り込み処理などの典型レシピを提供。サンプルコードから自分のリアルタイム対話 Agent を素早く作れます。"
+  },
+  "agent-skill-library": {
+    title: "Agora Skills",
+    subtitle: "AI Coding Assistant でリアルタイム対話アプリを素早く構築",
+    intro: "Agora 公式の知識パック。AI Coding Assistant が製品選定、認証情報の接続、最初の Demo 実行までを支援し、Voice Agent、AI Companion、AI Tutor、AI サポート、Physical AI アプリの構築に役立ちます。"
+  },
+  "agora-agents": {
+    title: "Agora Agents",
+    subtitle: "リアルタイム対話 Agent の開発プラットフォーム",
+    intro: "Agora のリアルタイムインタラクション基盤をもとに、Voice Agent とマルチモーダル Agent の構築、デプロイ、管理までを支える開発体験を提供します。"
+  },
+  "rte-meetup": {
+    title: "RTE Meetup",
+    subtitle: "リアルタイムAIに関心を持つ人たちが集まる場",
+    intro: "RTE コミュニティの代表的なオフラインイベント。トーク、パネル、Lightning Demo を通じて、開発者、起業家、研究者をつなぎ、リアルタイム体験と対話型AIの未来を探ります。"
+  },
+  "real-time-ai-cafe": {
+    title: "Real-Time AI Cafe",
+    subtitle: "一杯のコーヒーと無限の Token",
+    intro: "開発者が集まり、リアルタイムで coding、debug、交流するカフェ型ポップアップ。プロジェクト、ハードウェア、好奇心を持ち寄り、新しい可能性を一緒に build します。"
+  },
+  "rte-open-day": {
+    title: "RTE Open Day",
+    subtitle: "作り手と直接出会う展示型イベント",
+    intro: "コミュニティのプロジェクトとイノベーションチームが集まる展示型イベント。ブース、Demo、現場での対話を通じて、より多くの Builder とその背後にいる作り手を可視化します。"
+  },
+  "rte-dev-talk": {
+    title: "RTE Dev Talk",
+    subtitle: "技術トピックをいち早く議論する",
+    intro: "開発者向けのオンラインライブ番組。第一線の Builder と技術エキスパートを招き、最新トレンド、プロダクト実践、リアルな開発経験を共有します。"
+  },
+  "talk-with-ai": {
+    title: "Talk With AI ボードゲーム",
+    subtitle: "Voice Agent 起業をゲームで体験",
+    intro: "ランダムシナリオ、技術オークション、プロダクトピッチを通じて、Voice Agent 開発のリアルな道のりを遊べる体験に変えます。開発者や Founder が人とAIの未来を語るきっかけになります。"
+  },
+  "builder-ama": {
+    title: "WeChat グループ AMA",
+    subtitle: "プロジェクトの中核メンバーと直接対話",
+    intro: "プロダクト責任者、Founder、開発者をコミュニティに招き、ライブQ&Aを実施。小さな発表会のように、プロジェクトの背景にあるリアルな物語を知ることができます。"
+  },
+  "coding-voices-podcast": {
+    title: "『Coding Voices』ポッドキャスト",
+    subtitle: "Builder の本音と思考を聴く",
+    intro: "Voice AI、Physical AI、未来のインタラクションに取り組む開発者、研究者、起業家の一次体験と長期的な思考を記録します。"
+  },
+  "rte-conference": {
+    title: "RTE 年次カンファレンス",
+    subtitle: "年に一度のリアルタイムAIサミット",
+    intro: "開発者、起業家、投資家、エコシステムパートナーが集まり、リアルタイムインタラクション、Voice Agent、Physical AI、対話型AIの未来を議論します。"
+  },
+  "supersonic": {
+    title: "Supersonic 超音速プログラム",
+    subtitle: "高い可能性を持つ Builder のための成長プログラム",
+    intro: "Voice Agent、Physical AI、リアルタイムAI領域の起業家に向けて、リソース、仲間、市場接続、発表機会を提供。Demo からプロダクト、市場へ進むことを支援します。"
+  },
+  "realtime-ai-devkit": {
+    title: "Real-Time AI DevKit",
+    subtitle: "プロジェクトの立ち上げを支える開発リソース",
+    intro: "モデルクレジット、リアルタイムインタラクション機能、開発ボード試用、デジタルヒューマン、API などをまとめたリソースパック。試行錯誤のコストを下げ、プロトタイプ検証を加速します。"
+  },
+  "voice-agent-100": {
+    title: "Voice Agent 100",
+    subtitle: "15以上の垂直領域に広がる Voice Agent",
+    intro: "Voice Agent の多様な実装シーンを紹介するリスト。15以上の垂直領域と100以上のエージェント事例を整理し、開発者と Founder が実需、先行プロジェクト、商機を見つける助けになります。"
+  },
+  "go-global-morning-session": {
+    title: "Go Global 朝活",
+    subtitle: "グローバル展開に挑む人たちと学ぶ",
+    intro: "海外市場、成長、本地化、チャネル連携に焦点を当て、リアルなグローバル展開経験、市場観察、失敗からの学びを共有します。"
+  },
+  "supply-chain-morning-session": {
+    title: "サプライチェーン朝活",
+    subtitle: "AI ハードウェア起業のもう半分を理解する",
+    intro: "試作、製造、コスト管理、サプライチェーン連携をテーマに、AI ハードウェアと Physical AI チームが遠回りを減らせるよう支援します。"
+  },
+  "model-morning-session": {
+    title: "大規模モデル朝活",
+    subtitle: "モデル能力と Agent の進化を追う",
+    intro: "モデル能力、推論、マルチモーダル、Agent Framework、実装事例をめぐるクローズドな議論を通じて、Builder が技術感度を保てるよう支援します。"
+  },
+  "realtime-ai-daily": {
+    title: "RTE Developer Daily",
+    subtitle: "リアルタイムAIの変化を毎日キャッチ",
+    intro: "Voice AI、Physical AI、Agent、リアルタイムインタラクション領域の重要な動きを追い、Builder がトレンド、機会、新しいプロダクトを素早く把握できるようにします。"
+  },
+  "builder-stories": {
+    title: "Builder Stories",
+    subtitle: "Builder の成長の物語を記録する",
+    intro: "開発者や起業家がアイデアからプロダクトへ、プロジェクトから会社へ進むリアルな経験を紹介。より多くの初期の作り手が見つけられるきっかけを作ります。"
+  },
+  "voice-agent-camp": {
+    title: "Voice Agent Camp",
+    subtitle: "次世代の音声エージェントを作る",
+    intro: "Supersonic の主力プログラム。Voice Agent のプロダクト、技術、商用化をテーマに、開発者、起業家、エコシステムパートナーをつなぎ、深い共創を促します。"
+  },
+  "physical-ai-camp": {
+    title: "Physical AI Camp",
+    subtitle: "AI が物理世界に入る方法を探る",
+    intro: "Supersonic の主力プログラム。AI ハードウェア、ロボット、マルチモーダル体験、リアルタイム知能に焦点を当て、開発者、起業家、投資家、パートナーをつなぎます。"
+  },
+  "demo-review": {
+    title: "Lightning Demo",
+    subtitle: "3分で未完成の作品を見せる",
+    intro: "プロトタイプ、半完成品、生まれたばかりのアイデアでも、3分で見てもらえます。大きな講演だけでなく、いま build している人がフィードバックと仲間を見つける舞台を用意します。"
+  },
+  "demo-day-showcase": {
+    title: "年次 Demo Day",
+    subtitle: "その年の面白い対話型AIプロダクトを一挙に展示",
+    intro: "年に一度、コミュニティのエコシステムパートナーと投資家を招き、Voice AI と対話型AIプロジェクトの成果を展示。フィードバック、露出、協業機会、次のリソース獲得を支援します。"
+  },
+  "investor-network": {
+    title: "投資家ネットワーク",
+    subtitle: "AI を理解する投資家と話す",
+    intro: "Agent、AI ハードウェア、リアルタイムインタラクション領域に関心を持つ初期投資家と接続。対等なプロダクトと事業の対話を通じて、長期的な関係を築きます。"
+  },
+  "global-showcase": {
+    title: "グローバル展示ルート",
+    subtitle: "プロダクトをより大きな業界現場へ",
+    intro: "WAIC、BEYOND Expo、IVS などのグローバル展示会やスタートアップショーケースと接続し、Builder が市場フィードバック、協業リード、国際的な露出を得られるよう支援します。"
+  },
+  "global-expedition": {
+    title: "海外エコシステム視察",
+    subtitle: "世界のイノベーション現場に入る",
+    intro: "シリコンバレー、日本などのAIイノベーションエコシステムを訪ね、グローバル市場、プロダクトトレンド、現地の協業機会を理解し、一次情報を得ます。"
+  },
+  "rte-dev-party": {
+    title: "RTE Dev Party",
+    subtitle: "肩の力を抜いて、もう少し話す",
+    intro: "展示会やイベント後の軽い夜の交流の場。高密度な情報を自然な対話に変え、Founder、Developer、エコシステムパートナーがプロジェクト、協業、友人関係について一対一で話せる時間を作ります。"
+  }
+};
+
 export const englishCards: CardItem[] = cards.map((card) => ({
   ...card,
   ...englishCopy[card.id]
 }));
 
+export const japaneseCards: CardItem[] = cards.map((card) => ({
+  ...card,
+  ...japaneseCopy[card.id]
+}));
+
 export const cardsByLocale: Record<CardLocale, CardItem[]> = {
   zh: cards,
-  en: englishCards
+  en: englishCards,
+  ja: japaneseCards
 };

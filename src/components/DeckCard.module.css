@@ -65,6 +65,20 @@
     sans-serif;
 }
 
+.japanese {
+  font-family:
+    "Hiragino Sans",
+    "Hiragino Kaku Gothic ProN",
+    "Yu Gothic",
+    "YuGothic",
+    "Noto Sans JP",
+    "WenYuanRoundedSC",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+
 .cardText {
   position: absolute;
   left: 88px;
@@ -108,6 +122,18 @@
   line-height: 1.08;
 }
 
+.japanese .cardTitle {
+  max-width: 780px;
+  font-size: 68px;
+  line-height: 1.08;
+  font-weight: 900;
+}
+
+.japanese .longTitle {
+  font-size: 56px;
+  line-height: 1.14;
+}
+
 .cardSubtitle {
   margin: 26px 0 0;
   color: #111111;
@@ -129,6 +155,13 @@
   font-size: 29px;
   line-height: 1.34;
   font-weight: 650;
+}
+
+.japanese .cardSubtitle {
+  max-width: 780px;
+  font-size: 29px;
+  line-height: 1.38;
+  font-weight: 760;
 }
 
 .cardIntro {
@@ -166,6 +199,18 @@
 .english .longIntro {
   font-size: 26px;
   line-height: 1.5;
+}
+
+.japanese .cardIntro {
+  width: 750px;
+  font-size: 28px;
+  line-height: 1.58;
+  font-weight: 500;
+}
+
+.japanese .longIntro {
+  font-size: 25px;
+  line-height: 1.54;
 }
 
 .cardIcon {

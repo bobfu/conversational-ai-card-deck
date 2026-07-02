@@ -35,7 +35,8 @@ export default function HomePage() {
   const cancelZipRef = useRef(false);
   const exportRefs = useRef<Record<CardLocale, Record<string, HTMLDivElement | null>>>({
     zh: {},
-    en: {}
+    en: {},
+    ja: {}
   });
 
   useEffect(() => {
@@ -95,6 +96,11 @@ export default function HomePage() {
       title: "Build & Grow",
       body:
         "Generate RTE community cards from a maintainable web component. Update copy, links, and SVG icons to create new event-ready cards."
+    },
+    ja: {
+      title: "Build & Grow",
+      body:
+        "メンテナブルなWebコンポーネントで、RTEコミュニティカードを一括生成します。テキスト、リンク、SVGアイコンを更新するだけで、新しい展示会カードを作成できます。"
     }
   } satisfies Record<CardLocale, { title: string; body: string }>;
 
@@ -108,16 +114,37 @@ export default function HomePage() {
     });
   }
 
+  function getCancelingLabel(targetLocale: CardLocale) {
+    if (targetLocale === "zh") return "正在取消...";
+    if (targetLocale === "ja") return "キャンセル中...";
+    return "Cancelling...";
+  }
+
+  function getZipPhaseLabel(progress: ZipProgress) {
+    if (progress.phase === "zipping") {
+      if (progress.locale === "zh") return "正在压缩 ZIP";
+      if (progress.locale === "ja") return "ZIPを圧縮中";
+      return "Compressing ZIP";
+    }
+
+    if (progress.locale === "zh") return "正在生成卡片";
+    if (progress.locale === "ja") return "カードを生成中";
+    return "Rendering cards";
+  }
+
+  function getCancelLabel(targetLocale: CardLocale) {
+    if (targetLocale === "zh") return "取消";
+    if (targetLocale === "ja") return "キャンセル";
+    return "Cancel";
+  }
+
   function cancelZipDownload() {
     cancelZipRef.current = true;
     setZipProgress((progress) =>
       progress
         ? {
           ...progress,
-          currentFile:
-            progress.locale === "zh"
-              ? "正在取消..."
-              : "Cancelling..."
+          currentFile: getCancelingLabel(progress.locale)
         }
         : progress
     );
@@ -287,6 +314,13 @@ export default function HomePage() {
         >
           English
         </button>
+        <button
+          type="button"
+          className={locale === "ja" ? styles.active : ""}
+          onClick={() => setLocale("ja")}
+        >
+          日本語
+        </button>
 
         <div className={styles.toolbarDivider} />
 
@@ -306,20 +340,20 @@ export default function HomePage() {
         >
           {zipLocale === "en" ? "Packing English..." : "Download English ZIP"}
         </button>
+        <button
+          type="button"
+          className={styles.zipButton}
+          disabled={zipLocale !== null}
+          onClick={() => handleDownloadZip("ja")}
+        >
+          {zipLocale === "ja" ? "日本語を生成中..." : "日本語 ZIP をダウンロード"}
+        </button>
       </div>
 
       {zipProgress ? (
         <div className={styles.zipProgress} role="status" aria-live="polite">
           <div className={styles.zipProgressHeader}>
-            <strong>
-              {zipProgress.phase === "zipping"
-                ? zipProgress.locale === "zh"
-                  ? "正在压缩 ZIP"
-                  : "Compressing ZIP"
-                : zipProgress.locale === "zh"
-                  ? "正在生成卡片"
-                  : "Rendering cards"}
-            </strong>
+            <strong>{getZipPhaseLabel(zipProgress)}</strong>
             <span>
               {zipProgress.completed} / {zipProgress.total}
             </span>
@@ -337,7 +371,7 @@ export default function HomePage() {
               onClick={cancelZipDownload}
               disabled={zipProgress.phase === "zipping"}
             >
-              {zipProgress.locale === "zh" ? "取消" : "Cancel"}
+              {getCancelLabel(zipProgress.locale)}
             </button>
           </div>
         </div>

@@ -55,7 +55,8 @@ export function CardArtwork({
       className={[
         styles.card,
         card.series === "build" ? styles.build : styles.grow,
-        locale === "en" ? styles.english : ""
+        locale === "en" ? styles.english : "",
+        locale === "ja" ? styles.japanese : ""
       ].join(" ")}
     >
       <div className={styles.cardText}>
@@ -125,8 +126,10 @@ export function DeckCard({
 }: DeckCardProps) {
   const cardRef = useRef<HTMLDivElement | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
-  const downloadLabel = locale === "en" ? "Download PNG" : "下载 PNG";
-  const downloadingLabel = locale === "en" ? "Generating..." : "生成中...";
+  const downloadLabel =
+    locale === "en" ? "Download PNG" : locale === "ja" ? "PNGをダウンロード" : "下载 PNG";
+  const downloadingLabel =
+    locale === "en" ? "Generating..." : locale === "ja" ? "生成中..." : "生成中...";
 
   async function handleDownload() {
     if (!cardRef.current) return;
